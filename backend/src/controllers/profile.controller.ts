@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 // GET /api/users/:username (Public Endpoint)
 export const getPublicProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username } = req.params;
+    const username = req.params.username as string;
 
     const user = await prisma.user.findUnique({
       where: { username },
