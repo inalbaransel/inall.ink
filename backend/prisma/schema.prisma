@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(uuid())
+  username        String           @unique
+  email           String           @unique
+  passwordHash    String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  profileSettings ProfileSettings?
+  links           LinkItem[]
+}
+
+model ProfileSettings {
+  id              String       @id @default(uuid())
+  userId          String       @unique
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  avatarUrl       String?
+  avatarStyle     AvatarStyle  @default(STANDARD_CIRCLE)
+  backgroundColor String       @default("#ffffff")
+  buttonStyle     ButtonStyle  @default(SOLID)
+  buttonColor     String       @default("#000000")
+  fontColor       String       @default("#000000")
+  
+  updatedAt       DateTime     @updatedAt
+}
+
+model LinkItem {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title      String
+  url        String
+  orderIndex Int      @default(0) // Float da kullanılabilirdi, ancak transaction ile re-indexlemek daha tutarlı
+  isActive   Boolean  @default(true)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@index([userId, orderIndex])
+}
+
+enum AvatarStyle {
+  STANDARD_CIRCLE
+  FULL_HEADER
+}
+
+enum ButtonStyle {
+  SOLID
+  OUTLINE
+  SOFT_GLASS
+}
