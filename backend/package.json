@@ -21,6 +21,9 @@
     "jsonwebtoken": "^9.0.3",
     "zod": "^4.4.3"
   },
+  "engines": {
+    "node": "24.x"
+  },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
