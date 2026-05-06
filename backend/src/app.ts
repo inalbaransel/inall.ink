@@ -5,7 +5,8 @@ import rateLimit from 'express-rate-limit';
 
 import { authenticateToken } from './middlewares/auth.middleware';
 import { validate } from './middlewares/validate.middleware';
-import { updateProfileSettingsSchema, reorderLinksSchema } from './validators/schema.validator';
+import { registerSchema, loginSchema, updateProfileSettingsSchema, reorderLinksSchema } from './validators/schema.validator';
+import { registerController, loginController } from './controllers/auth.controller';
 import { getPublicProfile, getProfileSettings, updateProfileSettings } from './controllers/profile.controller';
 import { reorderLinks } from './controllers/link.controller';
 
@@ -13,7 +14,15 @@ const app = express();
 
 // Security Middlewares
 app.use(helmet());
-app.use(cors());
+
+// CORS configuration explicitly configured
+app.use(cors({
+  origin: '*', // Production'da bunu process.env.FRONTEND_URL veya spesifik domain(ler) ile değiştirmelisin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Rate Limiter for Auth Routes (Brute-Force Protection)
@@ -26,8 +35,8 @@ const authLimiter = rateLimit({
 });
 
 // -- Public Routes --
-// app.post('/api/auth/register', authLimiter, validate(registerSchema), registerController);
-// app.post('/api/auth/login', authLimiter, validate(loginSchema), loginController);
+app.post('/api/auth/register', authLimiter, validate(registerSchema), registerController);
+app.post('/api/auth/login', authLimiter, validate(loginSchema), loginController);
 app.get('/api/users/:username', getPublicProfile);
 
 // -- Protected Routes (Requires JWT) --
